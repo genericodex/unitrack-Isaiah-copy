@@ -167,7 +167,6 @@ class _AddCourseState extends State<AddCourse> {
           .select()
           .timeout(const Duration(seconds: 10));
 
-      // Fetch the complete course details with college and department info
       final newCourse = response[0];
       final courseWithDetails = {
         ...newCourse,
@@ -408,6 +407,7 @@ class _AddCourseState extends State<AddCourse> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -436,6 +436,7 @@ class _AddCourseState extends State<AddCourse> {
                           child: Text(
                             college['name'],
                             style: const TextStyle(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         );
                       }).toList(),
@@ -474,6 +475,7 @@ class _AddCourseState extends State<AddCourse> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -502,6 +504,7 @@ class _AddCourseState extends State<AddCourse> {
                             child: Text(
                               department['name'],
                               style: const TextStyle(fontSize: 16),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           );
                         }).toList(),
@@ -559,6 +562,7 @@ class _AddCourseState extends State<AddCourse> {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.green[700],
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -579,6 +583,7 @@ class _AddCourseState extends State<AddCourse> {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.green[700],
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -721,259 +726,315 @@ class _AddCourseState extends State<AddCourse> {
                     ),
                   )
                 : _selectedCollegeId == null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.school_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No College Selected',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please select a college to continue',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : _selectedDepartmentId == null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.category_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No Department Selected',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please select a department to view courses',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : _courses.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.menu_book_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No Courses Yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add your first course for $_selectedDepartmentName',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () => _fetchCourses(_selectedDepartmentId!),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(15),
-                      itemCount: _courses.length,
-                      itemBuilder: (context, index) {
-                        final course = _courses[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: Colors.grey[300]!),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey[100]!,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ExpansionTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.green[100],
-                              child: Text(
-                                (index + 1).toString(),
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.school_outlined,
+                              size: 80,
+                              color: Colors.grey[400],
                             ),
-                            title: Text(
-                              course['name'],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                            subtitle: Text(
-                              course['course_code'] ?? 'No Code',
+                            const SizedBox(height: 16),
+                            Text(
+                              'No College Selected',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 18,
                                 color: Colors.grey[600],
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            const SizedBox(height: 8),
+                            Text(
+                              'Please select a college to continue',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _selectedDepartmentId == null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                  onPressed: _isSaving
-                                      ? null
-                                      : () => _updateCourse(
-                                          course['id'].toString(),
-                                          course['name'],
-                                          course['course_code'] ?? '',
-                                        ),
+                                Icon(
+                                  Icons.category_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
                                 ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red,
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Department Selected',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  onPressed: _isSaving
-                                      ? null
-                                      : () => _deleteCourse(
-                                          course['id'].toString(),
-                                          course['name'],
-                                        ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Please select a department to view courses',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
                                 ),
                               ],
                             ),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(16),
+                          )
+                        : _courses.isEmpty
+                            ? Center(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[50],
-                                        borderRadius: BorderRadius.circular(10),
+                                    Icon(
+                                      Icons.menu_book_outlined,
+                                      size: 80,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'No Courses Yet',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey[600],
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Course Details',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.business,
-                                                size: 16,
-                                                color: Colors.grey,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                'College: ${_selectedCollegeName ?? "N/A"}',
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.category,
-                                                size: 16,
-                                                color: Colors.grey,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                'Department: ${_selectedDepartmentName ?? "N/A"}',
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.code,
-                                                size: 16,
-                                                color: Colors.grey,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                'Course Code: ${course['course_code'] ?? "N/A"}',
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Add your first course for $_selectedDepartmentName',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[500],
                                       ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
+                              )
+                            : RefreshIndicator(
+                                onRefresh: () =>
+                                    _fetchCourses(_selectedDepartmentId!),
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.all(15),
+                                  itemCount: _courses.length,
+                                  itemBuilder: (context, index) {
+                                    final course = _courses[index];
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        border: Border.all(
+                                            color: Colors.grey[300]!),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey[100]!,
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Theme(
+                                        data: Theme.of(context).copyWith(
+                                          dividerColor: Colors.transparent,
+                                        ),
+                                        child: ExpansionTile(
+                                          leading: CircleAvatar(
+                                            backgroundColor: Colors.green[100],
+                                            child: Text(
+                                              (index + 1).toString(),
+                                              style: TextStyle(
+                                                color: Colors.green[700],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          title: Text(
+                                            course['name'],
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          subtitle: Text(
+                                            course['course_code'] ?? 'No Code',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey[600],
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit_outlined,
+                                                  color: Colors.grey,
+                                                  size: 22,
+                                                ),
+                                                onPressed: _isSaving
+                                                    ? null
+                                                    : () => _updateCourse(
+                                                          course['id']
+                                                              .toString(),
+                                                          course['name'],
+                                                          course['course_code'] ??
+                                                              '',
+                                                        ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  color: Colors.red,
+                                                  size: 22,
+                                                ),
+                                                onPressed: _isSaving
+                                                    ? null
+                                                    : () => _deleteCourse(
+                                                          course['id']
+                                                              .toString(),
+                                                          course['name'],
+                                                        ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                              ),
+                                            ],
+                                          ),
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            12),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.grey[50],
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        const Text(
+                                                          'Course Details',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 14,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 8),
+                                                        Row(
+                                                          children: [
+                                                            const Icon(
+                                                              Icons.business,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                            const SizedBox(
+                                                                width: 8),
+                                                            Expanded(
+                                                              child: Text(
+                                                                'College: ${_selectedCollegeName ?? "N/A"}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 13,
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Row(
+                                                          children: [
+                                                            const Icon(
+                                                              Icons.category,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                            const SizedBox(
+                                                                width: 8),
+                                                            Expanded(
+                                                              child: Text(
+                                                                'Department: ${_selectedDepartmentName ?? "N/A"}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 13,
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Row(
+                                                          children: [
+                                                            const Icon(
+                                                              Icons.code,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                            const SizedBox(
+                                                                width: 8),
+                                                            Expanded(
+                                                              child: Text(
+                                                                'Course Code: ${course['course_code'] ?? "N/A"}',
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 13,
+                                                                ),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
           ),
         ],
       ),

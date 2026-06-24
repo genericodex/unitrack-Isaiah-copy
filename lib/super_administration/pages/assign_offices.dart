@@ -96,7 +96,8 @@ class _AssignOfficesState extends State<AssignOffices> {
           .timeout(const Duration(seconds: 10));
 
       setState(() {
-        _assignments = _withAdminLookup(List<Map<String, dynamic>>.from(response));
+        _assignments =
+            _withAdminLookup(List<Map<String, dynamic>>.from(response));
       });
     } catch (e) {
       if (e is PostgrestException && e.code == '42P01') {
@@ -107,8 +108,7 @@ class _AssignOfficesState extends State<AssignOffices> {
     }
   }
 
-  List<Map<String, dynamic>> _withAdminLookup(
-      List<Map<String, dynamic>> rows) {
+  List<Map<String, dynamic>> _withAdminLookup(List<Map<String, dynamic>> rows) {
     for (final row in rows) {
       if (row.containsKey('admins')) continue;
       final admin = _admins.firstWhere(
@@ -392,7 +392,6 @@ class _AssignOfficesState extends State<AssignOffices> {
       body: Column(
         children: [
           // Assignment Form
-          // Assignment Form
           Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
@@ -401,7 +400,7 @@ class _AssignOfficesState extends State<AssignOffices> {
             ),
             child: Column(
               children: [
-                // Office Dropdown - FIXED
+                // Office Dropdown
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Select Office',
@@ -491,7 +490,7 @@ class _AssignOfficesState extends State<AssignOffices> {
                 ),
                 const SizedBox(height: 15),
 
-                // Admin Dropdown - Also fixed for consistency
+                // Admin Dropdown
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Select Admin',
@@ -826,37 +825,189 @@ class _AssignOfficesState extends State<AssignOffices> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: _getLevelColor(office['level']).withOpacity(0.2),
-          child: Icon(
-            _getLevelIcon(office['level']),
-            color: _getLevelColor(office['level']),
-          ),
-        ),
-        title: Text(
-          office['name'],
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          _getOfficeSubtitle(office),
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: _getLevelColor(office['level']).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            office['level'] ?? 'Unknown',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: _getLevelColor(office['level']),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Office Name
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor:
+                      _getLevelColor(office['level']).withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(
+                    _getLevelIcon(office['level']),
+                    color: _getLevelColor(office['level']),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    office['name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: 12),
+
+            // Office Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (office['building'] != null &&
+                      office['building'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Building: ${office['building']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['room_number'] != null &&
+                      office['room_number'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.meeting_room,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Room: ${office['room_number']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['colleges'] != null &&
+                      office['colleges']['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.business,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'College: ${office['colleges']['name']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['departments'] != null &&
+                      office['departments']['name'] != null)
+                    Row(
+                      children: [
+                        Icon(Icons.account_tree,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Department: ${office['departments']['name']}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Level and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getLevelColor(office['level']).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _getLevelIcon(office['level']),
+                        size: 16,
+                        color: _getLevelColor(office['level']),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        office['level'] ?? 'Unknown',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _getLevelColor(office['level']),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    // Note: For unassigned offices, we don't show edit/delete buttons
+                    // as they're managed from the main office management screen
+                    Text(
+                      'Unassigned',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -880,188 +1031,259 @@ class _AssignOfficesState extends State<AssignOffices> {
           ),
         ],
       ),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: _getLevelColor(office['level']).withOpacity(0.2),
-          child: Icon(
-            _getLevelIcon(office['level']),
-            color: _getLevelColor(office['level']),
-          ),
-        ),
-        title: Text(
-          _safeText(office['name']),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          'Assigned to: ${_safeText(admin['full_name'])}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 13),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                office['level'] ?? 'Unknown',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: _getLevelColor(office['level']),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.swap_horiz, color: Colors.orange),
-              onPressed: _isSaving ? null : () => _reassignOffice(assignment),
-              tooltip: 'Reassign',
-            ),
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-              onPressed: _isSaving ? null : () => _unassignOffice(assignment),
-              tooltip: 'Remove Assignment',
-            ),
-          ],
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // Office Name
+            Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(10),
+                CircleAvatar(
+                  backgroundColor:
+                      _getLevelColor(office['level']).withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(
+                    _getLevelIcon(office['level']),
+                    color: _getLevelColor(office['level']),
+                    size: 22,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Office Details',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildDetailRow(
-                        Icons.location_on,
-                        'Building',
-                        _safeText(office['building']),
-                      ),
-                      _buildDetailRow(
-                        Icons.meeting_room,
-                        'Room',
-                        _safeText(office['room_number']),
-                      ),
-                      if (office['colleges'] != null)
-                        _buildDetailRow(
-                          Icons.business,
-                          'College',
-                          _safeText(office['colleges']?['name']),
-                        ),
-                      if (office['departments'] != null)
-                        _buildDetailRow(
-                          Icons.account_tree,
-                          'Department',
-                          _safeText(office['departments']?['name']),
-                        ),
-                      const Divider(height: 20),
-                      const Text(
-                        'Admin Details',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildDetailRow(
-                          Icons.person, 'Name', _safeText(admin['full_name'])),
-                      _buildDetailRow(
-                          Icons.email, 'Email', _safeText(admin['email'])),
-                      _buildDetailRow(
-                        Icons.badge,
-                        'Employee ID',
-                        _safeText(admin['employee_id']),
-                      ),
-                      _buildDetailRow(
-                          Icons.phone, 'Phone', _safeText(admin['phone'])),
-                      const Divider(height: 20),
-                      _buildDetailRow(
-                        Icons.calendar_today,
-                        'Assigned On',
-                        _formatDate(assignment['assigned_at']),
-                      ),
-                    ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    office['name'] ?? 'Unknown Office',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 12),
 
-  Widget _buildDetailRow(IconData icon, String label, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+            // Office Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (office['building'] != null &&
+                      office['building'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Building: ${office['building']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['room_number'] != null &&
+                      office['room_number'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.meeting_room,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Room: ${office['room_number']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['colleges'] != null &&
+                      office['colleges']['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.business,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'College: ${office['colleges']['name']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (office['departments'] != null &&
+                      office['departments']['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.account_tree,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Department: ${office['departments']['name']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const Divider(height: 16),
+                  // Admin Info
+                  Row(
+                    children: [
+                      Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Assigned to: ${_safeText(admin['full_name'])}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (admin['email'] != null && admin['email'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.email, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              admin['email'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Assigned: ${_formatDate(assignment['assigned_at'])}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              _safeText(value),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Level and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getLevelColor(office['level']).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _getLevelIcon(office['level']),
+                        size: 16,
+                        color: _getLevelColor(office['level']),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        office['level'] ?? 'Unknown',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _getLevelColor(office['level']),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.swap_horiz, color: Colors.orange),
+                      onPressed:
+                          _isSaving ? null : () => _reassignOffice(assignment),
+                      tooltip: 'Reassign',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline,
+                          color: Colors.red),
+                      onPressed:
+                          _isSaving ? null : () => _unassignOffice(assignment),
+                      tooltip: 'Remove Assignment',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-  }
-
-  String _getOfficeSubtitle(Map<String, dynamic> office) {
-    final parts = <String>[];
-    if (office['building'] != null &&
-        _safeText(office['building']).isNotEmpty) {
-      parts.add(_safeText(office['building']));
-    }
-    if (office['room_number'] != null &&
-        _safeText(office['room_number']).isNotEmpty) {
-      parts.add('Rm ${_safeText(office['room_number'])}');
-    }
-    if (office['colleges'] != null &&
-        _safeText(office['colleges']?['name']).isNotEmpty) {
-      parts.add(_safeText(office['colleges']?['name']));
-    }
-    return parts.isNotEmpty ? parts.join(' • ') : 'No additional details';
   }
 
   Color _getLevelColor(String? level) {

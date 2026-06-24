@@ -558,146 +558,224 @@ class _AddOfficeState extends State<AddOffice> {
           ),
         ],
       ),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: levelColor.withOpacity(0.2),
-          child: Icon(levelIcon, color: levelColor),
-        ),
-        title: Text(
-          office['name'],
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        subtitle: Text(
-          '${office['building'] ?? 'No building'} • Room ${office['room_number'] ?? 'N/A'}',
-          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: levelColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: levelColor.withOpacity(0.3)),
-              ),
-              child: Text(
-                level!,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: levelColor,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: Colors.grey),
-              onPressed: _isSaving ? null : () => _updateOffice(office),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: _isSaving
-                  ? null
-                  : () =>
-                      _deleteOffice(office['id'].toString(), office['name']),
-            ),
-          ],
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // Office Name with Icon
+            Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Office Details',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildDetailRow(Icons.category, 'Level', office['level']),
-                      _buildDetailRow(
-                        Icons.location_on,
-                        'Building',
-                        office['building'] ?? 'Not specified',
-                      ),
-                      _buildDetailRow(
-                        Icons.meeting_room,
-                        'Room Number',
-                        office['room_number'] ?? 'Not specified',
-                      ),
-                      if (office['colleges'] != null)
-                        _buildDetailRow(
-                          Icons.business,
-                          'College',
-                          office['colleges']['name'],
-                        ),
-                      if (office['departments'] != null)
-                        _buildDetailRow(
-                          Icons.account_tree,
-                          'Department',
-                          office['departments']['name'],
-                        ),
-                      if (office['description'] != null &&
-                          office['description'].isNotEmpty)
-                        _buildDetailRow(
-                          Icons.description,
-                          'Description',
-                          office['description'],
-                        ),
-                    ],
+                CircleAvatar(
+                  backgroundColor: levelColor.withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(levelIcon, color: levelColor, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    office['name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 12),
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+            // Office Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Building
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.location_on,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Building: ${office['building'] ?? 'Not specified'}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Room Number
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.meeting_room,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Room: ${office['room_number'] ?? 'Not specified'}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // College (if exists)
+                  if (office['colleges'] != null &&
+                      office['colleges']['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.business,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'College: ${office['colleges']['name']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Department (if exists)
+                  if (office['departments'] != null &&
+                      office['departments']['name'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.account_tree,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Department: ${office['departments']['name']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Description (if exists)
+                  if (office['description'] != null &&
+                      office['description'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.description,
+                              size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              office['description'],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 13, color: Colors.black87),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Level Badge and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Level Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: levelColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: levelColor.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        levelIcon,
+                        size: 16,
+                        color: levelColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        level!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: levelColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Action Buttons
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: Colors.grey),
+                      onPressed: _isSaving ? null : () => _updateOffice(office),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _deleteOffice(
+                              office['id'].toString(), office['name']),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -724,326 +802,7 @@ class _AddOfficeState extends State<AddOffice> {
       ),
       body: Column(
         children: [
-          // Add Office Form
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(15),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _officeNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Office Name',
-                        hintText:
-                            'e.g., Vice Chancellor\'s Office, College Registrar Office',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter office name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Office Level',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      value: _selectedLevel,
-                      hint: const Text('Select office level'),
-                      items: _officeLevels.map((level) {
-                        return DropdownMenuItem<String>(
-                          value: level,
-                          child: Row(
-                            children: [
-                              Icon(
-                                level == 'Top Level'
-                                    ? Icons.star
-                                    : level == 'College Level'
-                                        ? Icons.business
-                                        : Icons.category,
-                                size: 18,
-                                color: level == 'Top Level'
-                                    ? Colors.purple
-                                    : level == 'College Level'
-                                        ? Colors.blue
-                                        : Colors.green,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(level),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedLevel = value;
-                          _selectedCollegeId = null;
-                          _selectedDepartmentId = null;
-                          _departments = [];
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select office level';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    if (_selectedLevel == 'College Level' ||
-                        _selectedLevel == 'Department Level')
-                      Column(
-                        children: [
-                          DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              labelText: 'College',
-                              labelStyle: TextStyle(color: Colors.grey[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: const BorderSide(
-                                  color: Colors.green,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            value: _selectedCollegeId,
-                            hint: const Text('Select college'),
-                            items: _colleges.map((college) {
-                              return DropdownMenuItem<String>(
-                                value: college['id'].toString(),
-                                child: Text(college['name']),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedCollegeId = value;
-                                _selectedDepartmentId = null;
-                                if (value != null) {
-                                  _fetchDepartments(value);
-                                }
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return 'Please select a college';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 15),
-                        ],
-                      ),
-                    if (_selectedLevel == 'Department Level')
-                      Column(
-                        children: [
-                          DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              labelText: 'Department',
-                              labelStyle: TextStyle(color: Colors.grey[600]),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: const BorderSide(
-                                  color: Colors.green,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            value: _selectedDepartmentId,
-                            hint: const Text('Select department'),
-                            items: _departments.map((dept) {
-                              return DropdownMenuItem<String>(
-                                value: dept['id'].toString(),
-                                child: Text(dept['name']),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedDepartmentId = value;
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return 'Please select a department';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 15),
-                        ],
-                      ),
-                    TextFormField(
-                      controller: _buildingController,
-                      decoration: InputDecoration(
-                        labelText: 'Building *',
-                        hintText:
-                            'e.g., Senate Building, COCIS Building, Main Hall',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter building name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _roomNumberController,
-                      decoration: InputDecoration(
-                        labelText: 'Room Number *',
-                        hintText: 'e.g., Room 301, Level 2, Office 5',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter room number';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description (Optional)',
-                        hintText: 'Additional information about this office',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                      ),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 15),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        onPressed: _isSaving ? null : _addOffice,
-                        child: _isSaving
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : const Text(
-                                'ADD OFFICE',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
+          // Error Message
           if (_errorMessage != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -1066,6 +825,7 @@ class _AddOfficeState extends State<AddOffice> {
               ),
             ),
 
+          // Tabs
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
@@ -1101,57 +861,439 @@ class _AddOfficeState extends State<AddOffice> {
             ),
           ),
 
+          // Main Content - Single ScrollView with Form and Offices
           Expanded(
-            flex: 5,
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
                   )
-                : _getCurrentOffices().isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.business_outlined,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No Offices Added',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Add offices to start building the university structure',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchOffices,
-                        child: ListView.builder(
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Add Office Form
+                        Container(
                           padding: const EdgeInsets.all(15),
-                          itemCount: _getCurrentOffices().length,
-                          itemBuilder: (context, index) {
-                            return _buildOfficeCard(
-                              _getCurrentOffices()[index],
-                              index,
-                            );
-                          },
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: _officeNameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Office Name',
+                                    hintText:
+                                        'e.g., Vice Chancellor\'s Office, College Registrar Office',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter office name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Office Level',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  value: _selectedLevel,
+                                  hint: const Text('Select office level'),
+                                  items: _officeLevels.map((level) {
+                                    return DropdownMenuItem<String>(
+                                      value: level,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            level == 'Top Level'
+                                                ? Icons.star
+                                                : level == 'College Level'
+                                                    ? Icons.business
+                                                    : Icons.category,
+                                            size: 18,
+                                            color: level == 'Top Level'
+                                                ? Colors.purple
+                                                : level == 'College Level'
+                                                    ? Colors.blue
+                                                    : Colors.green,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              level,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedLevel = value;
+                                      _selectedCollegeId = null;
+                                      _selectedDepartmentId = null;
+                                      _departments = [];
+                                    });
+                                  },
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Please select office level';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                if (_selectedLevel == 'College Level' ||
+                                    _selectedLevel == 'Department Level')
+                                  Column(
+                                    children: [
+                                      DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        decoration: InputDecoration(
+                                          labelText: 'College',
+                                          labelStyle: TextStyle(
+                                              color: Colors.grey[600]),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                              color: Colors.green,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 15,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        value: _selectedCollegeId,
+                                        hint: const Text('Select college'),
+                                        items: _colleges.map((college) {
+                                          return DropdownMenuItem<String>(
+                                            value: college['id'].toString(),
+                                            child: Text(
+                                              college['name'],
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selectedCollegeId = value;
+                                            _selectedDepartmentId = null;
+                                            if (value != null) {
+                                              _fetchDepartments(value);
+                                            }
+                                          });
+                                        },
+                                        validator: (value) {
+                                          if (value == null) {
+                                            return 'Please select a college';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 15),
+                                    ],
+                                  ),
+                                if (_selectedLevel == 'Department Level')
+                                  Column(
+                                    children: [
+                                      DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        decoration: InputDecoration(
+                                          labelText: 'Department',
+                                          labelStyle: TextStyle(
+                                              color: Colors.grey[600]),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: BorderSide(
+                                              color: Colors.grey[300]!,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: const BorderSide(
+                                              color: Colors.green,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 15,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        value: _selectedDepartmentId,
+                                        hint: const Text('Select department'),
+                                        items: _departments.map((dept) {
+                                          return DropdownMenuItem<String>(
+                                            value: dept['id'].toString(),
+                                            child: Text(
+                                              dept['name'],
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selectedDepartmentId = value;
+                                          });
+                                        },
+                                        validator: (value) {
+                                          if (value == null) {
+                                            return 'Please select a department';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 15),
+                                    ],
+                                  ),
+                                TextFormField(
+                                  controller: _buildingController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Building *',
+                                    hintText:
+                                        'e.g., Senate Building, COCIS Building, Main Hall',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter building name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                TextFormField(
+                                  controller: _roomNumberController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Room Number *',
+                                    hintText:
+                                        'e.g., Room 301, Level 2, Office 5',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter room number';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                TextFormField(
+                                  controller: _descriptionController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Description (Optional)',
+                                    hintText:
+                                        'Additional information about this office',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  maxLines: 2,
+                                ),
+                                const SizedBox(height: 15),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                    ),
+                                    onPressed: _isSaving ? null : _addOffice,
+                                    child: _isSaving
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'ADD OFFICE',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+
+                        // Offices List
+                        if (_getCurrentOffices().isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(40),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.business_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Offices Added',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Add offices to start building the university structure',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              children: _getCurrentOffices()
+                                  .asMap()
+                                  .entries
+                                  .map((entry) =>
+                                      _buildOfficeCard(entry.value, entry.key))
+                                  .toList(),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),

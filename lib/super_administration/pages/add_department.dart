@@ -318,6 +318,7 @@ class _AddDepartmentState extends State<AddDepartment> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -346,6 +347,7 @@ class _AddDepartmentState extends State<AddDepartment> {
                       child: Text(
                         college['name'],
                         style: const TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
                   }).toList(),
@@ -397,6 +399,7 @@ class _AddDepartmentState extends State<AddDepartment> {
                               fontWeight: FontWeight.w500,
                               color: Colors.green[700],
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -507,147 +510,163 @@ class _AddDepartmentState extends State<AddDepartment> {
                     ),
                   )
                 : _selectedCollegeId == null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.business_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No College Selected',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please select a college from above',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : _departments.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.category_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No Departments Yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add your first department for $_selectedCollegeName',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () => _fetchDepartments(_selectedCollegeId!),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(15),
-                      itemCount: _departments.length,
-                      itemBuilder: (context, index) {
-                        final department = _departments[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: Colors.grey[300]!),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey[100]!,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.business_outlined,
+                              size: 80,
+                              color: Colors.grey[400],
                             ),
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.green[100],
-                              child: Text(
-                                (index + 1).toString(),
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
+                            const SizedBox(height: 16),
+                            Text(
+                              'No College Selected',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Please select a college from above',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _departments.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.category_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
                                 ),
-                              ),
-                            ),
-                            title: Text(
-                              department['name'],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                            trailing: SizedBox(
-                              width: 100,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: _isSaving
-                                        ? null
-                                        : () => _updateDepartment(
-                                            department['id'].toString(),
-                                            department['name'],
-                                          ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Departments Yet',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  const SizedBox(width: 5),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: _isSaving
-                                        ? null
-                                        : () => _deleteDepartment(
-                                            department['id'].toString(),
-                                            department['name'],
-                                          ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Add your first department for $_selectedCollegeName',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
                                   ),
-                                ],
-                              ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () =>
+                                _fetchDepartments(_selectedCollegeId!),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(15),
+                              itemCount: _departments.length,
+                              itemBuilder: (context, index) {
+                                final department = _departments[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15),
+                                    border:
+                                        Border.all(color: Colors.grey[300]!),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey[100]!,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 4.0),
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: Colors.green[100],
+                                          child: Text(
+                                            (index + 1).toString(),
+                                            style: TextStyle(
+                                              color: Colors.green[700],
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            department['name'],
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.edit_outlined,
+                                                color: Colors.grey,
+                                                size: 22,
+                                              ),
+                                              onPressed: _isSaving
+                                                  ? null
+                                                  : () => _updateDepartment(
+                                                        department['id']
+                                                            .toString(),
+                                                        department['name'],
+                                                      ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 22,
+                                              ),
+                                              onPressed: _isSaving
+                                                  ? null
+                                                  : () => _deleteDepartment(
+                                                        department['id']
+                                                            .toString(),
+                                                        department['name'],
+                                                      ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
           ),
         ],
       ),
