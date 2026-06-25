@@ -151,7 +151,6 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
     _editDescriptionController.text = oldDescription;
     _editSelectedPriorityId = oldPriorityId.toString();
 
-    // Find the selected priority details
     final selectedPriority = _priorities.firstWhere(
       (p) => p['id'] == oldPriorityId,
       orElse: () => {},
@@ -172,7 +171,6 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Category Name Field
                   TextField(
                     controller: _editCategoryNameController,
                     decoration: InputDecoration(
@@ -192,8 +190,6 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
                     autofocus: true,
                   ),
                   const SizedBox(height: 10),
-
-                  // Description Field
                   TextField(
                     controller: _editDescriptionController,
                     decoration: InputDecoration(
@@ -213,8 +209,6 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 10),
-
-                  // Priority Dropdown
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'Priority Level',
@@ -239,16 +233,9 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
                     items: _priorities.map((priority) {
                       return DropdownMenuItem<String>(
                         value: priority['id'].toString(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              priority['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          priority['name'],
+                          overflow: TextOverflow.ellipsis,
                         ),
                       );
                     }).toList(),
@@ -422,6 +409,210 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
     }
   }
 
+  Widget _buildCategoryCard(Map<String, dynamic> category, int index) {
+    final priority = category['issue_priorities'];
+    final priorityName = priority != null ? priority['name'] : 'Not set';
+    final priorityDays = priority != null ? priority['days_to_resolve'] : 0;
+    final priorityColor = _getPriorityColor(priorityName);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey[100]!,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Category Name with Icon
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: priorityColor.withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(
+                    Icons.category,
+                    color: priorityColor,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    category['name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Category Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Description
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.description,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            category['description'] ?? 'No description',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Priority
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.priority_high,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Priority: $priorityName',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: priorityColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Resolution Time
+                  Row(
+                    children: [
+                      Icon(Icons.timer, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Resolution Time: $priorityDays days',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Priority Badge and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Priority Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: priorityColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: priorityColor.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.priority_high,
+                        size: 16,
+                        color: priorityColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        priorityName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: priorityColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Action Buttons
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: Colors.grey),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _updateCategory(
+                                category['id'].toString(),
+                                category['name'],
+                                category['description'] ?? '',
+                                category['priority_id'],
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _deleteCategory(
+                                category['id'].toString(),
+                                category['name'],
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -444,170 +635,6 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
       ),
       body: Column(
         children: [
-          // Add Category Form
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Category Name Field
-                  TextFormField(
-                    controller: _categoryNameController,
-                    decoration: InputDecoration(
-                      labelText: 'Category Name',
-                      hintText:
-                          'e.g., Network Issue, Hardware Problem, Software Bug',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter category name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Description Field
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'Describe what this category covers',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Priority Dropdown - FIXED VERSION
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Priority Level',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 12,
-                      ),
-                    ),
-                    value: _selectedPriorityId,
-                    hint: const Text('Select priority level'),
-                    items: _priorities.map((priority) {
-                      return DropdownMenuItem<String>(
-                        value: priority['id'].toString(),
-                        child: Text(priority['name']), // Only show name
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedPriorityId = value;
-                        final selected = _priorities.firstWhere(
-                          (p) => p['id'].toString() == value,
-                        );
-                        _selectedPriorityName = selected['name'];
-                        _selectedPriorityDays = selected['days_to_resolve'];
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a priority level';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Add Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: _isSaving ? null : _addCategory,
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : const Text(
-                              'ADD CATEGORY',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // Error Message
           if (_errorMessage != null)
             Container(
@@ -631,7 +658,7 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
               ),
             ),
 
-          // Categories List
+          // Main Content - Single ScrollView with Form and Categories
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -639,240 +666,237 @@ class _AddIssuesCategoryState extends State<AddIssuesCategory> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
                   )
-                : _categories.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.category_outlined,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No Categories Added',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Add categories to classify different types of issues',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchCategories,
-                        child: ListView.builder(
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Add Category Form
+                        Container(
                           padding: const EdgeInsets.all(15),
-                          itemCount: _categories.length,
-                          itemBuilder: (context, index) {
-                            final category = _categories[index];
-                            final priority = category['issue_priorities'];
-                            final priorityName =
-                                priority != null ? priority['name'] : 'Not set';
-                            final priorityDays = priority != null
-                                ? priority['days_to_resolve']
-                                : 0;
-                            final priorityColor =
-                                _getPriorityColor(priorityName);
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                // Category Name Field
+                                TextFormField(
+                                  controller: _categoryNameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Category Name',
+                                    hintText:
+                                        'e.g., Network Issue, Hardware Problem, Software Bug',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter category name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
 
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: Colors.grey[300]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey[100]!,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ExpansionTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      priorityColor.withOpacity(0.2),
-                                  child: Icon(
-                                    Icons.category,
-                                    color: priorityColor,
-                                    size: 20,
-                                  ),
-                                ),
-                                title: Text(
-                                  category['name'],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  category['description'],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Priority Badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
+                                // Description Field
+                                TextFormField(
+                                  controller: _descriptionController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Description',
+                                    hintText:
+                                        'Describe what this category covers',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
                                       ),
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        color: priorityColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: priorityColor.withOpacity(0.3),
-                                        ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  maxLines: 3,
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter description';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+
+                                // Priority Dropdown
+                                DropdownButtonFormField<String>(
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Priority Level',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
                                       ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  value: _selectedPriorityId,
+                                  hint: const Text('Select priority level'),
+                                  items: _priorities.map((priority) {
+                                    return DropdownMenuItem<String>(
+                                      value: priority['id'].toString(),
                                       child: Text(
-                                        priorityName,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: priorityColor,
-                                        ),
+                                        priority['name'],
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit_outlined,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: _isSaving
-                                          ? null
-                                          : () => _updateCategory(
-                                                category['id'].toString(),
-                                                category['name'],
-                                                category['description'] ?? '',
-                                                category['priority_id'],
-                                              ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: _isSaving
-                                          ? null
-                                          : () => _deleteCategory(
-                                                category['id'].toString(),
-                                                category['name'],
-                                              ),
-                                    ),
-                                  ],
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedPriorityId = value;
+                                      final selected = _priorities.firstWhere(
+                                        (p) => p['id'].toString() == value,
+                                      );
+                                      _selectedPriorityName = selected['name'];
+                                      _selectedPriorityDays =
+                                          selected['days_to_resolve'];
+                                    });
+                                  },
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Please select a priority level';
+                                    }
+                                    return null;
+                                  },
                                 ),
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[50],
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'Category Details',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.description,
-                                                    size: 16,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: Text(
-                                                      'Description: ${category['description']}',
-                                                      style: const TextStyle(
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.priority_high,
-                                                    size: 16,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    'Priority: $priorityName',
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      color: priorityColor,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.timer,
-                                                    size: 16,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    'Resolution Time: $priorityDays days',
-                                                    style: const TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
+                                const SizedBox(height: 15),
+
+                                // Add Button
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
+                                    onPressed: _isSaving ? null : _addCategory,
+                                    child: _isSaving
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'ADD CATEGORY',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
-                                ],
-                              ),
-                            );
-                          },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+
+                        // Categories List
+                        if (_categories.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(40),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.category_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Categories Added',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Add categories to classify different types of issues',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              children: _categories
+                                  .asMap()
+                                  .entries
+                                  .map((entry) => _buildCategoryCard(
+                                      entry.value, entry.key))
+                                  .toList(),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),

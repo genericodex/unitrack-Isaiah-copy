@@ -129,7 +129,6 @@ class _AddAdminState extends State<AddAdmin> {
         password: randomPassword,
       );
 
-      // Clear form
       _fullNameController.clear();
       _emailController.clear();
       _employeeIdController.clear();
@@ -139,11 +138,8 @@ class _AddAdminState extends State<AddAdmin> {
         _isSaving = false;
       });
 
-      // Show password dialog
       await _showPasswordDialog(randomPassword, fullName, email);
       _showSnackBar('Admin created!', Colors.green);
-
-      // Refresh list
       await _fetchAdmins();
     } catch (e) {
       setState(() {
@@ -298,7 +294,6 @@ class _AddAdminState extends State<AddAdmin> {
           _isSaving = false;
         });
 
-        // Show new password dialog
         await _showPasswordDialog(newPassword, name, email);
         _showSnackBar(
           'Password reset successfully!',
@@ -352,7 +347,6 @@ class _AddAdminState extends State<AddAdmin> {
       });
 
       try {
-        // Delete from admins table only (auth user remains but can be deleted manually)
         await _supabase
             .from('admins')
             .delete()
@@ -384,6 +378,251 @@ class _AddAdminState extends State<AddAdmin> {
     );
   }
 
+  Widget _buildAdminCard(Map<String, dynamic> admin, int index) {
+    final color = Colors.green;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey[100]!,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Admin Name with Icon
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: color.withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: color,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _safeText(admin['full_name']),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                      Text(
+                        _safeText(admin['email']),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Admin Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Employee ID
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.badge_outlined,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Employee ID: ${_safeText(admin['employee_id'])}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Phone
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.phone_outlined,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Phone: ${_safeText(admin['phone'])}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Role
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.admin_panel_settings_outlined,
+                            size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Role: ${_safeText(admin['role']) == 'makerere_admin' ? 'Makerere Admin' : _safeText(admin['role'])}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Created Date
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined,
+                          size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Created: ${admin['created_at'] != null ? _formatDate(admin['created_at'].toString()) : 'N/A'}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Role Badge and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Role Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: color.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.verified_user,
+                        size: 16,
+                        color: color,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Admin',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Action Buttons
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.password_outlined,
+                          color: Colors.orange),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _resetPassword(
+                                _safeText(admin['id']),
+                                _safeText(admin['email']),
+                                _safeText(admin['full_name']),
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                      tooltip: 'Reset Password',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _deleteAdmin(
+                                _safeText(admin['id']),
+                                _safeText(admin['full_name']),
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                      tooltip: 'Delete Admin',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String dateTime) {
+    try {
+      final date = DateTime.parse(dateTime);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateTime.split('T')[0];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -406,191 +645,7 @@ class _AddAdminState extends State<AddAdmin> {
       ),
       body: Column(
         children: [
-          // Add Admin Form
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: InputDecoration(
-                      labelText: 'Full Name',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      prefixIcon: const Icon(
-                        Icons.person_outline,
-                        color: Colors.green,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter full name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Email (@mak.ac.ug)',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      prefixIcon: const Icon(
-                        Icons.email_outlined,
-                        color: Colors.green,
-                      ),
-                      hintText: 'admin@mak.ac.ug',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter email';
-                      }
-                      if (!value.trim().contains('@') ||
-                          !value.trim().contains('.')) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _employeeIdController,
-                    decoration: InputDecoration(
-                      labelText: 'Employee ID',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      prefixIcon: const Icon(
-                        Icons.badge_outlined,
-                        color: Colors.green,
-                      ),
-                      hintText: 'MAK-EMP-001',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter employee ID';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      prefixIcon: const Icon(
-                        Icons.phone_outlined,
-                        color: Colors.green,
-                      ),
-                      hintText: '+256 XXX XXX XXX',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter phone number';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: _isSaving ? null : _addAdmin,
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : const Text(
-                              'CREATE ADMIN ACCOUNT',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
+          // Error Message
           if (_errorMessage != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -613,6 +668,7 @@ class _AddAdminState extends State<AddAdmin> {
               ),
             ),
 
+          // Main Content - Single ScrollView with Form and Admins
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -620,219 +676,257 @@ class _AddAdminState extends State<AddAdmin> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
                   )
-                : _admins.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.admin_panel_settings_outlined,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No admins created yet',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Use the form above to create your first admin',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchAdmins,
-                        child: ListView.builder(
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Add Admin Form
+                        Container(
                           padding: const EdgeInsets.all(15),
-                          itemCount: _admins.length,
-                          itemBuilder: (context, index) {
-                            final admin = _admins[index];
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: Colors.grey[300]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey[100]!,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ExpansionTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: Colors.green[100],
-                                  child: Text(
-                                    (index + 1).toString(),
-                                    style: TextStyle(
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.bold,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: _fullNameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Full Name',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    prefixIcon: const Icon(
+                                      Icons.person_outline,
+                                      color: Colors.green,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
                                     ),
                                   ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter full name';
+                                    }
+                                    return null;
+                                  },
                                 ),
-                                title: Text(
-                                  _safeText(admin['full_name']),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  _safeText(admin['email']),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                trailing: SizedBox(
-                                  width: 84,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.password_outlined,
-                                          color: Colors.orange,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        constraints:
-                                            const BoxConstraints.tightFor(
-                                          width: 36,
-                                          height: 36,
-                                        ),
-                                        onPressed: _isSaving
-                                            ? null
-                                            : () => _resetPassword(
-                                                  _safeText(admin['id']),
-                                                  _safeText(admin['email']),
-                                                  _safeText(admin['full_name']),
-                                                ),
-                                        tooltip: 'Reset Password',
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: InputDecoration(
+                                    labelText: 'Email (@mak.ac.ug)',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    prefixIcon: const Icon(
+                                      Icons.email_outlined,
+                                      color: Colors.green,
+                                    ),
+                                    hintText: 'admin@mak.ac.ug',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
                                       ),
-                                      const SizedBox(width: 2),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.red,
-                                        ),
-                                        padding: EdgeInsets.zero,
-                                        constraints:
-                                            const BoxConstraints.tightFor(
-                                          width: 36,
-                                          height: 36,
-                                        ),
-                                        onPressed: _isSaving
-                                            ? null
-                                            : () => _deleteAdmin(
-                                                  _safeText(admin['id']),
-                                                  _safeText(admin['full_name']),
-                                                ),
-                                        tooltip: 'Delete Admin',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _buildInfoRow(
-                                          Icons.badge_outlined,
-                                          'Employee ID',
-                                          _safeText(admin['employee_id']),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        _buildInfoRow(
-                                          Icons.phone_outlined,
-                                          'Phone',
-                                          _safeText(admin['phone']),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        _buildInfoRow(
-                                          Icons.calendar_today_outlined,
-                                          'Created',
-                                          admin['created_at'] != null
-                                              ? _formatDate(
-                                                  admin['created_at']
-                                                      .toString(),
-                                                )
-                                              : 'N/A',
-                                        ),
-                                        const SizedBox(height: 12),
-                                        _buildInfoRow(
-                                          Icons.admin_panel_settings_outlined,
-                                          'Role',
-                                          _safeText(admin['role']) ==
-                                                  'makerere_admin'
-                                              ? 'Makerere Admin'
-                                              : _safeText(admin['role']),
-                                        ),
-                                      ],
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
                                     ),
                                   ),
-                                ],
-                              ),
-                            );
-                          },
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter email';
+                                    }
+                                    if (!value.trim().contains('@') ||
+                                        !value.trim().contains('.')) {
+                                      return 'Please enter a valid email address';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _employeeIdController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Employee ID',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    prefixIcon: const Icon(
+                                      Icons.badge_outlined,
+                                      color: Colors.green,
+                                    ),
+                                    hintText: 'MAK-EMP-001',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter employee ID';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: InputDecoration(
+                                    labelText: 'Phone Number',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    prefixIcon: const Icon(
+                                      Icons.phone_outlined,
+                                      color: Colors.green,
+                                    ),
+                                    hintText: '+256 XXX XXX XXX',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter phone number';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                    ),
+                                    onPressed: _isSaving ? null : _addAdmin,
+                                    child: _isSaving
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'CREATE ADMIN ACCOUNT',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+
+                        // Admins List
+                        if (_admins.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(40),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.admin_panel_settings_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Admins Created',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Use the form above to create your first admin',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              children: _admins
+                                  .asMap()
+                                  .entries
+                                  .map((entry) =>
+                                      _buildAdminCard(entry.value, entry.key))
+                                  .toList(),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildInfoRow(IconData icon, String label, dynamic value) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            _safeText(value),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatDate(String dateTime) {
-    try {
-      final date = DateTime.parse(dateTime);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return dateTime.split('T')[0];
-    }
   }
 }

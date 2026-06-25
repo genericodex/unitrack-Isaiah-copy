@@ -13,12 +13,12 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
   final _priorityNameController = TextEditingController();
   final _daysController = TextEditingController();
   final _supabase = Supabase.instance.client;
-  
+
   List<Map<String, dynamic>> _priorities = [];
   bool _isLoading = false;
   bool _isSaving = false;
   String? _errorMessage;
-  
+
   String? _editingId;
   final _editPriorityNameController = TextEditingController();
   final _editDaysController = TextEditingController();
@@ -92,7 +92,7 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
     try {
       final priorityName = _priorityNameController.text.trim();
       final daysToResolve = int.parse(_daysController.text.trim());
-      
+
       final response = await _supabase
           .from('issue_priorities')
           .insert({
@@ -122,7 +122,7 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
   Future<void> _updatePriority(String id, String oldName, int oldDays) async {
     _editPriorityNameController.text = oldName;
     _editDaysController.text = oldDays.toString();
-    
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -189,8 +189,10 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
     if (result == true) {
       final newName = _editPriorityNameController.text.trim();
       final newDays = int.tryParse(_editDaysController.text.trim());
-      
-      if (newName.isNotEmpty && newDays != null && (newName != oldName || newDays != oldDays)) {
+
+      if (newName.isNotEmpty &&
+          newDays != null &&
+          (newName != oldName || newDays != oldDays)) {
         setState(() {
           _isSaving = true;
           _errorMessage = null;
@@ -200,7 +202,7 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
           final updates = <String, dynamic>{};
           if (newName != oldName) updates['name'] = newName;
           if (newDays != oldDays) updates['days_to_resolve'] = newDays;
-          
+
           await _supabase
               .from('issue_priorities')
               .update(updates)
@@ -208,10 +210,12 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
               .timeout(const Duration(seconds: 10));
 
           setState(() {
-            final index = _priorities.indexWhere((priority) => priority['id'] == id);
+            final index =
+                _priorities.indexWhere((priority) => priority['id'] == id);
             if (index != -1) {
               if (newName != oldName) _priorities[index]['name'] = newName;
-              if (newDays != oldDays) _priorities[index]['days_to_resolve'] = newDays;
+              if (newDays != oldDays)
+                _priorities[index]['days_to_resolve'] = newDays;
             }
             _isSaving = false;
           });
@@ -298,6 +302,214 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
     return '$days days';
   }
 
+  Widget _buildPriorityCard(Map<String, dynamic> priority, int index) {
+    final priorityName = priority['name'];
+    final daysToResolve = priority['days_to_resolve'];
+    final color = _priorityColors[priorityName] ?? Colors.grey;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey[100]!,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Priority Name with Icon
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: color.withOpacity(0.2),
+                  radius: 20,
+                  child: Icon(
+                    _getPriorityIcon(priorityName),
+                    color: color,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    priorityName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Priority Details
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Resolution Time
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.timer, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Resolution Time: ${_getDaysText(daysToResolve)}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Priority Level Description
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _getPriorityDescription(priorityName),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Bottom Row - Days Badge and Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Days Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: color.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: color,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$daysToResolve days',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Action Buttons
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: Colors.grey),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _updatePriority(
+                                priority['id'].toString(),
+                                priorityName,
+                                daysToResolve,
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _deletePriority(
+                                priority['id'].toString(),
+                                priorityName,
+                              ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 24,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getPriorityDescription(String priorityName) {
+    switch (priorityName.toLowerCase()) {
+      case 'low':
+        return 'Low impact issues that can be resolved when time permits';
+      case 'medium':
+        return 'Moderate impact issues that should be addressed promptly';
+      case 'high':
+        return 'High impact issues requiring urgent attention';
+      case 'critical':
+        return 'Critical issues that need immediate resolution';
+      default:
+        return 'Standard priority level';
+    }
+  }
+
+  IconData _getPriorityIcon(String priorityName) {
+    switch (priorityName.toLowerCase()) {
+      case 'low':
+        return Icons.arrow_downward;
+      case 'medium':
+        return Icons.remove;
+      case 'high':
+        return Icons.arrow_upward;
+      case 'critical':
+        return Icons.warning;
+      default:
+        return Icons.priority_high;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -320,149 +532,6 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
       ),
       body: Column(
         children: [
-          // Add Priority Form
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Priority Name Field
-                  TextFormField(
-                    controller: _priorityNameController,
-                    decoration: InputDecoration(
-                      labelText: 'Priority Name',
-                      hintText: 'e.g., Low, Medium, High, Critical',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter priority name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  
-                  // Days to Resolve Field
-                  TextFormField(
-                    controller: _daysController,
-                    decoration: InputDecoration(
-                      labelText: 'Days to Resolve',
-                      hintText: 'Number of days to resolve issues with this priority',
-                      labelStyle: TextStyle(color: Colors.grey[600]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      suffixText: 'days',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter days to resolve';
-                      }
-                      final days = int.tryParse(value);
-                      if (days == null || days < 1) {
-                        return 'Please enter a valid number of days (minimum 1)';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  
-                  // Add Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: _isSaving ? null : _addPriority,
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : const Text(
-                              'ADD PRIORITY',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Info Box
-          Container(
-            margin: const EdgeInsets.all(15),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.blue[200]!),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Issues will automatically escalate to the next priority level if not resolved within the specified days',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue[700],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
           // Error Message
           if (_errorMessage != null)
             Container(
@@ -486,7 +555,7 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
               ),
             ),
 
-          // Priorities List
+          // Main Content - Single ScrollView with Form and Priorities
           Expanded(
             child: _isLoading
                 ? const Center(
@@ -494,162 +563,214 @@ class _AddIssuePrioritiesState extends State<AddIssuePriorities> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
                   )
-                : _priorities.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.priority_high_outlined,
-                              size: 80,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No Priorities Added',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Add priorities like Low, Medium, High, Critical',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _fetchPriorities,
-                        child: ListView.builder(
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Add Priority Form
+                        Container(
                           padding: const EdgeInsets.all(15),
-                          itemCount: _priorities.length,
-                          itemBuilder: (context, index) {
-                            final priority = _priorities[index];
-                            final priorityName = priority['name'];
-                            final daysToResolve = priority['days_to_resolve'];
-                            final color = _priorityColors[priorityName] ?? Colors.grey;
-                            
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: Colors.grey[300]!),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey[100]!,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 8,
-                                ),
-                                leading: CircleAvatar(
-                                  backgroundColor: color.withOpacity(0.2),
-                                  child: Icon(
-                                    _getPriorityIcon(priorityName),
-                                    color: color,
-                                  ),
-                                ),
-                                title: Text(
-                                  priorityName,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  'Resolution time: ${_getDaysText(daysToResolve)}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Days Badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        color: color.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: color.withOpacity(0.3)),
-                                      ),
-                                      child: Text(
-                                        '$daysToResolve days',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: color,
-                                        ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border(
+                              bottom: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                // Priority Name Field
+                                TextFormField(
+                                  controller: _priorityNameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Priority Name',
+                                    hintText:
+                                        'e.g., Low, Medium, High, Critical',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
                                       ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit_outlined,
-                                        color: Colors.grey,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter priority name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+
+                                // Days to Resolve Field
+                                TextFormField(
+                                  controller: _daysController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Days to Resolve',
+                                    hintText:
+                                        'Number of days to resolve issues with this priority',
+                                    labelStyle:
+                                        TextStyle(color: Colors.grey[600]),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: const BorderSide(
+                                        color: Colors.green,
+                                        width: 2,
                                       ),
-                                      onPressed: _isSaving
-                                          ? null
-                                          : () => _updatePriority(
-                                              priority['id'].toString(),
-                                              priorityName,
-                                              daysToResolve,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide:
+                                          BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    suffixText: 'days',
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter days to resolve';
+                                    }
+                                    final days = int.tryParse(value);
+                                    if (days == null || days < 1) {
+                                      return 'Please enter a valid number of days (minimum 1)';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 15),
+
+                                // Add Button
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      minimumSize:
+                                          const Size(double.infinity, 50),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                    ),
+                                    onPressed: _isSaving ? null : _addPriority,
+                                    child: _isSaving
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                             ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: _isSaving
-                                          ? null
-                                          : () => _deletePriority(
-                                              priority['id'].toString(),
-                                              priorityName,
+                                          )
+                                        : const Text(
+                                            'ADD PRIORITY',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.white,
                                             ),
-                                    ),
-                                  ],
+                                          ),
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+
+                        // Info Box
+                        Container(
+                          margin: const EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.blue[200]!),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline,
+                                  color: Colors.blue[700], size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Issues will automatically escalate to the next priority level if not resolved within the specified days',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Priorities List
+                        if (_priorities.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(40),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.priority_high_outlined,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Priorities Added',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Add priorities like Low, Medium, High, Critical',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              children: _priorities
+                                  .asMap()
+                                  .entries
+                                  .map((entry) => _buildPriorityCard(
+                                      entry.value, entry.key))
+                                  .toList(),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
     );
-  }
-
-  IconData _getPriorityIcon(String priorityName) {
-    switch (priorityName.toLowerCase()) {
-      case 'low':
-        return Icons.arrow_downward;
-      case 'medium':
-        return Icons.remove;
-      case 'high':
-        return Icons.arrow_upward;
-      case 'critical':
-        return Icons.warning;
-      default:
-        return Icons.priority_high;
-    }
   }
 }

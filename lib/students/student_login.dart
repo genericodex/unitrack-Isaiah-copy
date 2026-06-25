@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uni_track/landindPage/landing_page.dart';
 import 'package:uni_track/services/mobile_data_service.dart';
 import 'package:uni_track/students/students_mainpage.dart';
 import 'package:uni_track/students/students_register.dart';
@@ -466,6 +467,31 @@ class _StudentLoginState extends State<StudentLogin> {
                       ],
                     ),
                     const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Go to the landing page?",
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LandingPage(),
+                            ),
+                          ),
+                          child: Text(
+                            'Landing page',
+                            style: TextStyle(
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

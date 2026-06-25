@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uni_track/administration/admin_mainpage.dart';
+import 'package:uni_track/landindPage/landing_page.dart';
 import 'package:uni_track/services/mobile_data_service.dart';
 import 'package:uni_track/super_administration/pages/super_admin_homepage.dart';
 
@@ -323,7 +324,32 @@ class _AdminLoginpageState extends State<AdminLoginpage> {
                     ),
                   ),
                   const SizedBox(height: 30),
-
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Go to the landing page?",
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LandingPage(),
+                          ),
+                        ),
+                        child: Text(
+                          'Landing page',
+                          style: TextStyle(
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
                   // Help Text
                   Container(
                     padding: const EdgeInsets.all(12),
