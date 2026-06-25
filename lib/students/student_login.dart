@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uni_track/services/mobile_data_service.dart';
+import 'package:uni_track/services/web_api_service.dart';
 import 'package:uni_track/students/students_mainpage.dart';
 import 'package:uni_track/students/students_register.dart';
 
@@ -92,6 +93,9 @@ class _StudentLoginState extends State<StudentLogin> {
             studentData['department_id'] = course['department_id'];
           }
         }
+
+        // Pre-auth Web API for Supabase-authenticated users too
+        WebApiService().signInMobileAuth(email, password).catchError((_) {});
       }
 
       final currentStudentData = studentData;
@@ -100,6 +104,9 @@ class _StudentLoginState extends State<StudentLogin> {
         setState(() {
           _isLoading = false;
         });
+
+        // Pre-auth Web API so AI features work seamlessly
+        WebApiService().signInMobileAuth(email, password).catchError((_) {});
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

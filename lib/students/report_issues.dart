@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uni_track/services/mobile_data_service.dart';
+import 'package:uni_track/services/web_api_service.dart';
 
 class ReportIssuePage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -25,6 +26,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
 
   final _supabase = Supabase.instance.client;
   final _data = MobileDataService();
+  final _webApi = WebApiService();
 
   List<Map<String, dynamic>> _categories = [];
   String? _selectedCategoryId;
@@ -346,13 +348,46 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
     });
 
     try {
-      final result = await _data.suggestCategoryAndOffice(
-        title: title,
-        description: description,
-      );
+      Map<String, dynamic> result;
+
+      try {
+        result = await _webApi.getAiSuggestion(
+          title: title,
+          description: description,
+        );
+      } catch (_) {
+        result = await _data.suggestCategoryAndOffice(
+          title: title,
+          description: description,
+        );
+      }
+
       if (!mounted) return;
+
+      final classification =
+          result['classification'] as Map<String, dynamic>? ?? {};
+      final rag = result['rag'] as Map<String, dynamic>? ?? {};
+
       setState(() {
-        _aiSuggestion = result;
+        _aiSuggestion = {
+          'categoryId': result['categoryId'],
+          'categoryName': result['categoryName'],
+          'confidence':
+              classification['confidence'] ?? result['confidence'] ?? 0,
+          'method': classification['method'] ?? result['method'] ?? 'web_api',
+          'matchedKeywords':
+              (classification['matchedKeywords'] as List?)?.cast<String>() ??
+                  (result['matchedKeywords'] as List?)?.cast<String>() ??
+                  <String>[],
+          'sentimentUrgency': classification['sentimentUrgency'] ??
+              result['sentimentUrgency'] ??
+              0,
+          'officeId': result['officeId'],
+          'officeName': result['officeName'],
+          'reasoning': rag['reasoning']?.toString() ??
+              result['reasoning']?.toString() ??
+              '',
+        };
         _isAiLoading = false;
         final suggestedCategoryId = result['categoryId'];
         if (suggestedCategoryId != null) {
@@ -385,21 +420,36 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
     String? attachmentType,
     int? attachmentSize,
   }) async {
-    final response = await _data.createComplaint(
-      studentId: widget.userData?['id']?.toString() ?? '',
-      title: title,
-      description: description,
-      categoryId: categoryId,
-      officeId: officeId,
-      location: location,
-      gpsLatitude: gpsLatitude,
-      gpsLongitude: gpsLongitude,
-      attachmentUrl: attachmentUrl,
-      attachmentName: attachmentName,
-      attachmentType: attachmentType,
-      attachmentSize: attachmentSize,
-    );
-    return response;
+    try {
+      return await _webApi.createComplaint(
+        title: title,
+        description: description,
+        categoryId: categoryId,
+        officeId: officeId,
+        location: location,
+        gpsLatitude: gpsLatitude,
+        gpsLongitude: gpsLongitude,
+        attachmentUrl: attachmentUrl,
+        attachmentName: attachmentName,
+        attachmentType: attachmentType,
+        attachmentSize: attachmentSize,
+      );
+    } catch (_) {
+      return await _data.createComplaint(
+        studentId: widget.userData?['id']?.toString() ?? '',
+        title: title,
+        description: description,
+        categoryId: categoryId,
+        officeId: officeId,
+        location: location,
+        gpsLatitude: gpsLatitude,
+        gpsLongitude: gpsLongitude,
+        attachmentUrl: attachmentUrl,
+        attachmentName: attachmentName,
+        attachmentType: attachmentType,
+        attachmentSize: attachmentSize,
+      );
+    }
   }
 
   Color _getPriorityColor(String? priorityName) {
